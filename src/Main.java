@@ -34,7 +34,6 @@ public class Main {
             if (productCount == 0) {
                 basket.getPurchasesCount()[productNumber] = 0;
                 out.println("Продукт обнулен");
-                continue;
             }
             basket.addToCart(productNumber, productCount); // добавление товара и его кол-во в корзину
         }

@@ -18,13 +18,15 @@ public class Basket {
     public void printCatalog() { // вывод товаров
         out.println("Список возможных товаров для покупки");
         for (int i = 0; i < products.length; i++) {
-            out.println((i
-                    + 1)
+            out.println((i + 1)
                     + ". "
                     + products[i]
                     + " "
                     + prices[i]
-                    + " руб/шт");
+                    + " руб/шт "
+                    + "(в корзине "
+                    + purchasesCount[i]
+                    + " шт)");
         }
     }
 
@@ -57,10 +59,9 @@ public class Basket {
     public void saveTxt(File textFile) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(textFile))) {
             for (int i = 0; i < products.length; i++) {
-                if (purchasesCount[i] != 0) {
-                    writer.write(products[i] + " " + purchasesCount[i] + " " + prices[i] + " ");
-                    writer.newLine();
-                }
+                writer.write(products[i] + " " + purchasesCount[i] + " " + prices[i] + " ");
+                writer.newLine();
+
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
