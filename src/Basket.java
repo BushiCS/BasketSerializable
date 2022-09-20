@@ -61,7 +61,6 @@ public class Basket {
             for (int i = 0; i < products.length; i++) {
                 writer.write(products[i] + " " + purchasesCount[i] + " " + prices[i] + " ");
                 writer.newLine();
-
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -72,12 +71,11 @@ public class Basket {
         try (BufferedReader reader = new BufferedReader(new BufferedReader(new FileReader(textFile)))) {
             if (reader.ready()) {
                 String[] readerArray = reader.lines().toArray(String[]::new); // разбив на массив строк
-                String[] stringSplitArray; // массив для разделения строк
                 String[] productsLoad = new String[readerArray.length];
                 String[] countLoad = new String[readerArray.length];
                 String[] pricesLoad = new String[readerArray.length];
                 for (int i = 0; i < readerArray.length; i++) {
-                    stringSplitArray = readerArray[i].split(" "); // разделение каждой строки (ячейки массива) (на каждой итерации) в массив
+                    String[] stringSplitArray = readerArray[i].split(" "); // разделение каждой строки [ячейки массива] (на каждой итерации) в массив
                     productsLoad[i] = stringSplitArray[0];  // присвоение в нужный массив нужных данных
                     countLoad[i] = stringSplitArray[1];
                     pricesLoad[i] = stringSplitArray[2];
