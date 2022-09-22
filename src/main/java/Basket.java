@@ -5,15 +5,20 @@ import static java.lang.System.out;
 
 public class Basket {
     private int sumProducts;
-    private final int[] prices;
-    private final String[] products;
+    private int[] prices;
+    private String[] products;
     private int[] purchasesCount;
+
+    public Basket() {
+
+    }
 
     public Basket(int[] prices, String[] products) {
         this.prices = prices;
         this.products = products;
         purchasesCount = new int[prices.length];
     }
+
 
     public void printCatalog() { // вывод товаров
         out.println("Список возможных товаров для покупки");
@@ -32,7 +37,7 @@ public class Basket {
 
     public void addToCart(int productNumber, int productCount) { // добавление товара в корзину
         out.println(products[productNumber] + " " + (productCount + purchasesCount[productNumber]) + " шт. (по цене " + prices[productNumber] + " руб. за штуку)");
-        purchasesCount[productNumber] += productCount; // общее кол-во взятого товара[номер выбранного товара] += кол-во выбранного товара
+        purchasesCount[productNumber] += productCount;
         out.println("Сумма: " + (prices[productNumber] * purchasesCount[productNumber]) + " руб.");
     }
 
@@ -96,6 +101,26 @@ public class Basket {
         return purchasesCount;
     }
 
+    public int[] getPrices() {
+        return prices;
+    }
+
+    public String[] getProducts() {
+        return products;
+    }
+
+    public int getSumProducts() {
+        return sumProducts;
+    }
+
+    @Override
+    public String toString() {
+        return "Basket{" +
+                "prices=" + Arrays.toString(prices) +
+                ", products=" + Arrays.toString(products) +
+                ", purchasesCount=" + Arrays.toString(purchasesCount) +
+                '}';
+    }
 }
 
 

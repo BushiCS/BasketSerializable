@@ -1,4 +1,7 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
 
 import static java.lang.System.out;
@@ -9,13 +12,16 @@ public class Main {
         String[] products = new String[]{"Хлеб", "Яблоки", "Молоко"};
         int[] prices = new int[]{50, 20, 80};
         File backupFile = new File("basket.txt");
+        File jsonFile = new File("basket.json");
         Basket basket;
+        ClientLog purchasesLog = new ClientLog();
+        ObjectMapper mapper = new ObjectMapper();
 
-        if (backupFile.exists()) {
-            if (Basket.loadFromTxtFile(backupFile) != null) {
-                basket = Basket.loadFromTxtFile(backupFile);
-            } else {
-                basket = new Basket(prices, products);
+        if (jsonFile.exists()) {
+            try {
+                basket = mapper.readValue(jsonFile, Basket.class);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         } else {
             basket = new Basket(prices, products);
@@ -31,6 +37,7 @@ public class Main {
             String[] parts = input.split(" ");
             int productNumber = Integer.parseInt(parts[0]) - 1;
             int productCount = Integer.parseInt(parts[1]);
+            purchasesLog.log(productNumber, productCount); // добавление данных в лог
             if (productCount == 0) {
                 basket.getPurchasesCount()[productNumber] = 0;
                 out.println("Продукт обнулен");
@@ -38,6 +45,12 @@ public class Main {
             basket.addToCart(productNumber, productCount); // добавление товара и его кол-во в корзину
         }
         basket.printCart(); // подсчет и вывод корзины
-        basket.saveTxt(new File("basket.txt"));
+        purchasesLog.exportAsCSV(new File("log.csv"));
+        try {
+            mapper.writeValue(jsonFile, basket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
