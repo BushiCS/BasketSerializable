@@ -1,6 +1,8 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import java.io.*;
 import java.util.Arrays;
-
 import static java.lang.System.out;
 
 public class Basket {
@@ -10,7 +12,6 @@ public class Basket {
     private int[] purchasesCount;
 
     public Basket() {
-
     }
 
     public Basket(int[] prices, String[] products) {
@@ -18,7 +19,6 @@ public class Basket {
         this.products = products;
         purchasesCount = new int[prices.length];
     }
-
 
     public void printCatalog() { // вывод товаров
         out.println("Список возможных товаров для покупки");
@@ -113,13 +113,99 @@ public class Basket {
         return sumProducts;
     }
 
-    @Override
-    public String toString() {
-        return "Basket{" +
-                "prices=" + Arrays.toString(prices) +
-                ", products=" + Arrays.toString(products) +
-                ", purchasesCount=" + Arrays.toString(purchasesCount) +
-                '}';
+    public static Basket loadWithXML(Node root, File jsonFile, File backupFile) {
+        NodeList nodeList = root.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) { // перебор по деревьям-детям
+            if (nodeList.item(i).getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            String enabled = "";
+            String fileName = "";
+            String format = "";
+            Node node = nodeList.item(i);
+            if (node.getNodeName().equals("load")) {
+                NodeList loadNodes = node.getChildNodes();
+                for (int j = 0; j < loadNodes.getLength(); j++) {
+                    if (loadNodes.item(j).getNodeType() != Node.ELEMENT_NODE) {
+                        continue;
+                    }
+                    switch (loadNodes.item(j).getNodeName()) {
+                        case "enabled" -> enabled = loadNodes.item(j).getTextContent();
+                        case "fileName" -> fileName = loadNodes.item(j).getTextContent();
+                        case "format" -> format = loadNodes.item(j).getTextContent();
+                    }
+                }
+                if (enabled.equals("true")) {
+                    if (fileName.equals("basket.json")) {
+                        if (format.equals("json")) {
+                            return loadJson(jsonFile);
+                        }
+                    } else if (fileName.equals("basket.txt")) {
+                        if (format.equals("txt")) {
+                            return loadFromTxtFile(backupFile);
+                        }
+                    }
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void saveWithXML(Node root, File jsonFile, File txtFile, Basket basket) {
+        NodeList nodeList = root.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) { // перебор по деревьям-детям
+            if (nodeList.item(i).getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            String enabled = "";
+            String fileName = "";
+            String format = "";
+            Node node = nodeList.item(i);
+            if (node.getNodeName().equals("save")) {
+                NodeList loadNodes = node.getChildNodes();
+                for (int j = 0; j < loadNodes.getLength(); j++) {
+                    if (loadNodes.item(j).getNodeType() != Node.ELEMENT_NODE) {
+                        continue;
+                    }
+                    switch (loadNodes.item(j).getNodeName()) {
+                        case "enabled" -> enabled = loadNodes.item(j).getTextContent();
+                        case "fileName" -> fileName = loadNodes.item(j).getTextContent();
+                        case "format" -> format = loadNodes.item(j).getTextContent();
+                    }
+                }
+                if (enabled.equals("true")) {
+                    if (fileName.equals("basket.json")) {
+                        if (format.equals("json")) {
+                            saveJSON(jsonFile, basket);
+                        }
+                    } else if (fileName.equals("basket.txt")) {
+                        if (format.equals("txt")) {
+                            saveTxt(txtFile);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static Basket loadJson(File jsonFile) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(jsonFile, Basket.class);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public void saveJSON(File jsonFile, Basket basket) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            mapper.writeValue(jsonFile, basket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

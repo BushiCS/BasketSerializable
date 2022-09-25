@@ -1,5 +1,10 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
@@ -7,25 +12,30 @@ import java.util.Scanner;
 import static java.lang.System.out;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
         Scanner sc = new Scanner(System.in);
         String[] products = new String[]{"Хлеб", "Яблоки", "Молоко"};
         int[] prices = new int[]{50, 20, 80};
-        File backupFile = new File("basket.txt");
+        File txtFile = new File("basket.txt");
         File jsonFile = new File("basket.json");
         Basket basket;
         ClientLog purchasesLog = new ClientLog();
-        ObjectMapper mapper = new ObjectMapper();
 
-        if (jsonFile.exists()) {
-            try {
-                basket = mapper.readValue(jsonFile, Basket.class);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); // Создается построитель документа
+        DocumentBuilder builder = factory.newDocumentBuilder(); // Создается дерево DOM документа из файла
+        Document doc = builder.parse(new File("shop.xml"));
+        Node root = doc.getDocumentElement(); // Получаем корневой элемент
+
+        if (jsonFile.exists() || txtFile.exists()) { // если файлы для считывания существуют
+            if (Basket.loadWithXML(root, jsonFile, txtFile) != null) { // если метод не возвращает null
+                basket = Basket.loadWithXML(root, jsonFile, txtFile); // то работаем с возвращенной корзиной
+            } else { // если метод вернул null
+                basket = new Basket(prices, products); // то создаем новую корзину
             }
-        } else {
-            basket = new Basket(prices, products);
+        } else { // если файлы не существуют
+            basket = new Basket(prices, products); // то создаем новую корзину
         }
+
         assert basket != null;
         basket.printCatalog();
         while (true) {
@@ -45,12 +55,7 @@ public class Main {
             basket.addToCart(productNumber, productCount); // добавление товара и его кол-во в корзину
         }
         basket.printCart(); // подсчет и вывод корзины
-        purchasesLog.exportAsCSV(new File("log.csv"));
-        try {
-            mapper.writeValue(jsonFile, basket);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        purchasesLog.logWithXML(root, new File("log.csv"));
+        basket.saveWithXML(root, jsonFile, txtFile, basket);
     }
 }
