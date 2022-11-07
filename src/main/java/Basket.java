@@ -195,7 +195,7 @@ public class Basket {
         try {
             return mapper.readValue(jsonFile, Basket.class);
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            return null;
         }
     }
 

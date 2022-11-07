@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ClientLog {
 
-    private List<String[]> logList = new ArrayList<>();
+    private final List<String[]> logList = new ArrayList<>();
 
     public void log(int productNumber, int productCount) {
         logList.add(new String[]{String.valueOf(productNumber), String.valueOf(productCount)});
